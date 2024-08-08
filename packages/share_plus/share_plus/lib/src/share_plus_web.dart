@@ -10,7 +10,7 @@ import 'package:share_plus_platform_interface/share_plus_platform_interface.dart
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:url_launcher_web/url_launcher_web.dart';
 import 'package:web/web.dart' as web
-    show DOMException, File, FilePropertyBag, Navigator, window;
+    show DOMException, File, FilePropertyBag, Navigator, ShareData, window;
 
 /// The web implementation of [SharePlatform].
 class SharePlusWebPlugin extends SharePlatform {
@@ -34,7 +34,7 @@ class SharePlusWebPlugin extends SharePlatform {
     Uri uri, {
     Rect? sharePositionOrigin,
   }) async {
-    final data = ShareData.url(
+    final data = web.ShareData(
       url: uri.toString(),
     );
 
@@ -74,14 +74,14 @@ class SharePlusWebPlugin extends SharePlatform {
     String? subject,
     Rect? sharePositionOrigin,
   }) async {
-    final ShareData data;
+    final web.ShareData data;
     if (subject != null && subject.isNotEmpty) {
-      data = ShareData.textWithTitle(
+      data = web.ShareData(
         title: subject,
         text: text,
       );
     } else {
-      data = ShareData.text(
+      data = web.ShareData(
         text: text,
       );
     }
@@ -167,27 +167,27 @@ class SharePlusWebPlugin extends SharePlatform {
       webFiles.add(await _fromXFile(xFile, nameOverride: filename));
     }
 
-    final ShareData data;
+    final web.ShareData data;
     if (text != null && text.isNotEmpty) {
       if (subject != null && subject.isNotEmpty) {
-        data = ShareData.filesWithTextAndTitle(
+        data = web.ShareData(
           files: webFiles.toJS,
           text: text,
           title: subject,
         );
       } else {
-        data = ShareData.filesWithText(
+        data = web.ShareData(
           files: webFiles.toJS,
           text: text,
         );
       }
     } else if (subject != null && subject.isNotEmpty) {
-      data = ShareData.filesWithTitle(
+      data = web.ShareData(
         files: webFiles.toJS,
         title: subject,
       );
     } else {
-      data = ShareData.files(
+      data = web.ShareData(
         files: webFiles.toJS,
       );
     }
@@ -247,46 +247,3 @@ const _resultDismissed = ShareResult(
   '',
   ShareResultStatus.dismissed,
 );
-
-extension on web.Navigator {
-  /// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/canShare
-  external bool canShare(ShareData data);
-
-  /// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share
-  external JSPromise share(ShareData data);
-}
-
-extension type ShareData._(JSObject _) implements JSObject {
-  external factory ShareData.text({
-    String text,
-  });
-
-  external factory ShareData.textWithTitle({
-    String text,
-    String title,
-  });
-
-  external factory ShareData.files({
-    JSArray<web.File> files,
-  });
-
-  external factory ShareData.filesWithText({
-    JSArray<web.File> files,
-    String text,
-  });
-
-  external factory ShareData.filesWithTitle({
-    JSArray<web.File> files,
-    String title,
-  });
-
-  external factory ShareData.filesWithTextAndTitle({
-    JSArray<web.File> files,
-    String text,
-    String title,
-  });
-
-  external factory ShareData.url({
-    String url,
-  });
-}
